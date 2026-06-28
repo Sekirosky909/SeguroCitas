@@ -1,7 +1,26 @@
 # Seguro Médico Integral conectado a SQL Server
 
 Este proyecto usa el HTML entregado por el usuario y lo conecta a SQL Server por medio de FastAPI.
+## Notas importantes
+para poder usar este proyecto debes tener instalado `Python` y la extensión de visual studio code `live preview`
 
+Si deseas puedes descargarlo desde `Powershell`, para esto, instalaras python desde este simbolo de sistema.
+```text
+Invoke-WebRequest -Uri "https://www.python.org/ftp/python/3.14.0/python-3.14.0-amd64.exe" -OutFile "$env:USERPROFILE\Downloads\python-3.14.0-amd64.exe"
+```
+
+Al descargarlo puedes abrirlo con el siguiente comando.
+```text
+Start-Process "$env:USERPROFILE\Downloads\python-3.14.0-amd64.exe"
+```
+
+Al instalarlo, recuerda marcar la casilla "Add Python to PATH" antes de hacer clic en Install Now.
+
+Para probarlo usa el comando 
+
+```text
+python --version
+```
 ## Estructura
 
 ```text
