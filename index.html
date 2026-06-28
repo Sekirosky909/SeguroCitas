@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seguro Médico | Gestión de Citas</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="hero">
+    <nav class="navbar">
+      <div class="left-zone">
+        <button id="admin-login-button" class="login-chip">🔐 Login admin</button>
+        <button id="admin-logout-button" class="login-chip logout hidden">Cerrar sesión</button>
+      </div>
+
+      <div class="brand">
+        <div class="brand-icon">✚</div>
+        <div>
+          <h1>Seguro Médico Integral</h1>
+          <p>Sistema de citas, recepción, doctores y administración</p>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <button class="nav-btn active" data-screen="public-screen">Usuario</button>
+        <button class="nav-btn admin-only hidden" data-screen="admin-screen">Administración</button>
+        <button class="nav-btn admin-only hidden" data-screen="reception-screen">Recepción</button>
+        <button class="nav-btn admin-only hidden" data-screen="doctor-screen">Doctores</button>
+        <button class="nav-btn admin-only hidden" data-screen="dashboard-screen">Dashboard</button>
+      </div>
+    </nav>
+
+    <section class="hero-content">
+      <h2>Gestión de citas médicas</h2>
+      <div class="hero-card">
+        <p class="metric-label">Citas registradas</p>
+        <strong id="hero-active-count">0</strong>
+        <span id="hero-duration-label">Duración: 30 min</span>
+      </div>
+    </section>
+  </header>
+
+  <main>
+    <section id="public-screen" class="screen active-screen">
+      <div class="section-heading">
+        <div>
+          <h2>Solicitar, consultar o cancelar una cita</h2>
+        </div>
+        <p>El usuario normal no entra al panel interno. Solo usa su código de seguimiento y cédula.</p>
+      </div>
+
+      <div class="grid two-columns">
+        <form id="appointment-form" class="card form-card">
+          <h3>Nueva solicitud de cita</h3>
+          <div class="form-grid">
+            <label>
+              Nombre completo del paciente
+              <input type="text" id="patient-name" placeholder="Ej. Carlos Méndez" required />
+            </label>
+            <label>
+              Cédula o identificación
+              <input type="text" id="patient-id" placeholder="Ej. 8-888-888" required />
+            </label>
+            <label>
+              Teléfono
+              <input type="tel" id="patient-phone" placeholder="Ej. 6000-0000" required />
+            </label>
+            <label>
+              Correo opcional
+              <input type="email" id="patient-email" placeholder="correo@ejemplo.com" />
+            </label>
+            <label>
+              Hospital preferido
+              <select id="hospital" required></select>
+            </label>
+            <label>
+              Especialidad requerida
+              <select id="specialty" required></select>
+            </label>
+            <label>
+              Prioridad
+              <select id="priority" required>
+                <option value="Normal">Normal</option>
+                <option value="Alta">Alta</option>
+                <option value="Urgente">Urgente</option>
+              </select>
+            </label>
+            <label>
+              Fecha preferida
+              <input type="date" id="preferred-date" required />
+            </label>
+            <label>
+              Hora preferida
+              <input type="time" id="preferred-time" required />
+            </label>
+          </div>
+          <label>
+            Motivo de la cita
+            <textarea id="reason" rows="4" placeholder="Describe el motivo de atención" required></textarea>
+          </label>
+          <label>
+            Persona que envía la solicitud
+            <input type="text" id="requested-by" placeholder="Ej. Ana Pérez, hija del paciente" required />
+          </label>
+          <button type="submit" class="primary-btn">Enviar solicitud</button>
+          <div id="tracking-result" class="result-box hidden"></div>
+        </form>
+
+        <aside class="card info-card">
+          <h3>Consultar cita existente</h3>
+          <p class="muted-text">Usa el código entregado al crear la cita y la identificación del paciente.</p>
+          <form id="lookup-form" class="lookup-form">
+            <label>
+              Código de seguimiento
+              <input type="text" id="lookup-code" placeholder="Ej. CITA-7F3K2Q" required />
+            </label>
+            <label>
+              Cédula o identificación
+              <input type="text" id="lookup-patient-id" placeholder="Ej. 8-888-888" required />
+            </label>
+            <button type="submit" class="secondary-btn">Buscar cita</button>
+          </form>
+          <div id="public-appointment-result"></div>
+
+          <div class="notice">
+            <strong>Regla del usuario:</strong> puede cancelar o pedir reprogramación, pero no puede escoger doctor directamente. Esa decisión queda para administración/recepción.
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="admin-screen" class="screen admin-screen">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">Panel administrativo</span>
+          <h2>Doctores, hospitales, especialidades y tiempo X</h2>
+        </div>
+        <p>Desde aquí se alimentan los catálogos que usará recepción para asignar citas.</p>
+      </div>
+
+      <div class="grid two-columns admin-layout">
+        <div class="card">
+          <h3>Configuración general</h3>
+          <form id="settings-form" class="inline-form">
+            <label>
+              Duración por cita, en minutos
+              <input type="number" id="duration-minutes" min="5" step="5" required />
+            </label>
+            <button class="primary-btn" type="submit">Guardar tiempo X</button>
+          </form>
+          <div class="notice compact">
+            El sistema usa esta duración para evitar choques: si una cita dura 30 minutos, otro paciente no puede ocupar ese mismo doctor dentro de esa ventana.
+          </div>
+        </div>
+
+        <div class="card danger-zone">
+          <h3>Datos de prueba</h3>
+          <p>Reinicia toda la demo con hospitales, especialidades, doctores y citas iniciales.</p>
+          <button class="danger-btn" id="reset-demo">Reiniciar demo</button>
+        </div>
+      </div>
+
+      <div class="grid three-columns">
+        <section class="card">
+          <h3>Agregar hospital</h3>
+          <form id="hospital-form">
+            <label>Nombre del hospital<input type="text" id="hospital-name" required placeholder="Ej. Hospital Central" /></label>
+            <label>Dirección<input type="text" id="hospital-address" required placeholder="Ej. Vía España" /></label>
+            <label>Teléfono<input type="tel" id="hospital-phone" required placeholder="Ej. 6000-2222" /></label>
+            <button class="primary-btn" type="submit">Agregar hospital</button>
+          </form>
+          <div id="hospital-list" class="mini-list"></div>
+        </section>
+
+        <section class="card">
+          <h3>Agregar especialidad</h3>
+          <form id="specialty-form">
+            <label>Nombre<input type="text" id="specialty-name" required placeholder="Ej. Pediatría" /></label>
+            <label>Descripción<textarea id="specialty-description" rows="3" placeholder="Atención médica para niños"></textarea></label>
+            <button class="primary-btn" type="submit">Agregar especialidad</button>
+          </form>
+          <div id="specialty-list" class="mini-list"></div>
+        </section>
+
+        <section class="card">
+          <h3>Agregar doctor</h3>
+          <form id="doctor-form">
+            <label>Nombre completo<input type="text" id="doctor-name" required placeholder="Ej. Dra. Sofía Núñez" /></label>
+            <label>Hospital<select id="doctor-hospital" required></select></label>
+            <label>Especialidad<select id="doctor-specialty" required></select></label>
+            <label>Consultorio<input type="text" id="doctor-room" required placeholder="Ej. Consultorio 205" /></label>
+            <label>Correo<input type="email" id="doctor-email" placeholder="doctor@seguro.com" /></label>
+            <button class="primary-btn" type="submit">Agregar doctor</button>
+          </form>
+          <div id="doctor-admin-list" class="mini-list"></div>
+        </section>
+      </div>
+    </section>
+
+    <section id="reception-screen" class="screen admin-screen">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">Panel interno</span>
+          <h2>Recepción y asignación de doctores</h2>
+        </div>
+        <p>Aquí se decide qué doctor atenderá cada solicitud o cambio pedido por el usuario.</p>
+      </div>
+
+      <div class="toolbar card">
+        <label>
+          Filtrar por estado
+          <select id="status-filter">
+            <option value="Todos">Todos</option>
+            <option value="Pendiente">Pendiente</option>
+            <option value="Asignada">Asignada</option>
+            <option value="Reprogramación solicitada">Reprogramación solicitada</option>
+            <option value="Confirmada">Confirmada</option>
+            <option value="Atendida">Atendida</option>
+            <option value="Cancelada">Cancelada</option>
+          </select>
+        </label>
+        <label>
+          Buscar paciente
+          <input type="search" id="search-patient" placeholder="Nombre, cédula o código" />
+        </label>
+      </div>
+
+      <div id="reception-list" class="cards-list"></div>
+    </section>
+
+    <section id="doctor-screen" class="screen admin-screen">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">Panel médico</span>
+          <h2>Citas asignadas al doctor</h2>
+        </div>
+        <p>El doctor puede revisar sus citas y actualizar el estado de atención.</p>
+      </div>
+
+      <div class="toolbar card single-toolbar">
+        <label>
+          Seleccionar doctor
+          <select id="doctor-selector"></select>
+        </label>
+      </div>
+      <div id="doctor-list" class="cards-list"></div>
+    </section>
+
+    <section id="dashboard-screen" class="screen admin-screen">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">Visualización</span>
+          <h2>Dashboard general</h2>
+        </div>
+        <p>Resumen rápido para defender el proyecto en la presentación.</p>
+      </div>
+
+      <div class="stats-grid">
+        <article class="stat-card"><span>Total</span><strong id="stat-total">0</strong><p>Citas y solicitudes</p></article>
+        <article class="stat-card"><span>Pendientes</span><strong id="stat-pending">0</strong><p>Esperan asignación</p></article>
+        <article class="stat-card"><span>Asignadas</span><strong id="stat-assigned">0</strong><p>Ya tienen doctor</p></article>
+        <article class="stat-card"><span>Atendidas</span><strong id="stat-done">0</strong><p>Cerradas por doctor</p></article>
+      </div>
+
+      <div class="grid two-columns dashboard-grid">
+        <div class="card"><h3>Citas por especialidad</h3><div id="specialty-chart" class="bar-chart"></div></div>
+        <div class="card"><h3>Citas por hospital</h3><div id="hospital-chart" class="bar-chart"></div></div>
+        <div class="card"><h3>Citas por doctor</h3><div id="doctor-chart" class="bar-chart"></div></div>
+        <div class="card"><h3>Estados</h3><div id="status-chart" class="bar-chart"></div></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="login-modal" class="modal hidden" aria-hidden="true">
+    <div class="modal-card">
+      <button id="close-login" class="modal-close" type="button">×</button>
+      <h2>Acceso administrativo</h2>
+      <p class="muted-text">Demo local. Usuario: <strong>admin</strong> · Contraseña: <strong>Seguro123</strong></p>
+      <form id="login-form">
+        <label>Usuario<input type="text" id="admin-user" autocomplete="username" required /></label>
+        <label>Contraseña<input type="password" id="admin-password" autocomplete="current-password" required /></label>
+        <button class="primary-btn" type="submit">Ingresar</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
